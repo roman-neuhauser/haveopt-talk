@@ -1,0 +1,99 @@
+.. default-role:: strong
+
+`haveopt` — Option parser for sh
+================================
+
+* POSIX getopts
+* GNU getopt
+
+
+`POSIX getopts` - Nice but limited
+==================================
+
+* only short options
+
+
+`GNU getopt` - Brain damaged
+============================
+
+* permutes command lines
+
+
+`SYNOPSIS`
+==========
+
+.. parsed-literal::
+
+  `. haveopt.sh`
+
+  `haveopt` -h|--help
+  `haveopt` OPTIND OPTNAME OPTARG [OPTSPEC...] \\
+            -- "$@"
+  `haveopt` OPTIND OPTNAME OPTARG [OPTSPEC...] \\
+            -- [ARG...]
+
+
+POSIX getopts
+=============
+
+.. parsed-literal::
+
+  usage="[-J] [-T FILE] operands\\n"
+  o_compression=gzip
+  o_filesfrom=
+  i=0
+  while getopts :JT: opt; do
+    case $opt in
+    J) o_compression=xz ;;
+    T) o_filesfrom="$OPTARG" ;;
+    ?) printf "Usage: %s: %s" $0 "$usage"
+       exit 2
+       ;;
+    esac
+  done
+
+POSIX getopts, cont'd
+=====================
+
+.. parsed-literal::
+
+  printf "Use %s (de)compression\\n" "$o_compression"
+  if [ ! -z "$o_filesfrom" ]; then
+    printf 'Get pathnames to extract from "%s"\\n' "$o_filesfrom"
+  fi
+  shift $((OPTIND - 1))
+  printf "Remaining arguments are: %s\\n" "$*"
+
+
+haveopt
+=======
+
+.. parsed-literal::
+
+  usage="[-J|--xz] [-T FILE|--files-from=FILE] operands\\n"
+  o_compression=gzip
+  o_filesfrom=
+  i=0
+  while haveopt i opt arg J xz T= files-from= -- "$@"
+  do
+    case $opt in
+    J|xz) o_compression=xz ;;
+    T|files-from) o_filesfrom="$arg" ;;
+    ?) printf "Usage: %s: %s" $0 "$usage"
+       exit 2
+       ;;
+    esac
+  done
+
+haveopt, cont'd
+===============
+
+.. parsed-literal::
+
+  printf "Use %s (de)compression\\n" "$o_compression"
+  if [ ! -z "$o_filesfrom" ]; then
+    printf 'Get pathnames to extract from "%s"\\n' "$o_filesfrom"
+  fi
+  shift $i
+  printf "Remaining arguments are: %s\\n" "$*"
+
